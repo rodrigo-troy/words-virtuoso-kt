@@ -4,69 +4,35 @@ import org.hyperskill.hstest.testcase.CheckResult
 import org.hyperskill.hstest.testing.TestedProgram
 
 class WordsVirtuosoTest : StageTest<Any>() {
-    private val correctWordFile = mapOf(
-            "words.txt" to "stove\nkilos\nWISER\nInTrO\nGyruS\nalong\npedal"
-    )
-    private val invalidWordsFiles = mapOf(
-            "invalidwords1.txt" to "kilos\nwords\nINTRO\nexit\nand\ncontain",
-            "invalidwords2.txt" to "words\nhello\nPIZZA",
-            "invalidwords3.txt" to "words\ntrain\nήλιος\nΔrash\nedt#r\n1nums\nwo rd",
-    )
-    private val numOfInvalidWords = mapOf(
-            "invalidwords1.txt" to 3,
-            "invalidwords2.txt" to 2,
-            "invalidwords3.txt" to 5
+    private val wordFiles = mapOf(
+            "somewords.txt" to "stove\nKILOS\nalong\nkites\nartis\nthorn\nflags\njonty\nglift\ninvar" +
+                    "\nsteal\nburnt\nrains\nvelar\nafter\ncives\ntrove\ndebag\npaiks\nyoung\nshaft" +
+                    "\nbinks\nplows\nchamp\nsixth\nsynod\nroids\nanigh\nforts\natopy\ntired\nskite",
+            "wrongwords.txt" to "stove\nkilos\nalong\nkites\nartis\nthorn\nflags\njonty\nglift\ninvar" +
+                    "\nand\ncontain\nhello\nΔrash\nedt#r\n1nums\nwo rd",
+            "somecandidates.txt" to "STOVE\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nyoung\nshaft\nsixth\ntired",
+            "wrongcandidates.txt" to "stove\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nand\ncontain\nhello\nΔrash\nedt#r\n1nums\nwo rd\n12345\nPizza",
+            "addcandidates.txt" to "STOVE\nkilos\nalong\nkites\nthorn\nflags\nsteal\nburnt\nrains\nafter" +
+                    "\nyoung\nshaft\nsixth\ntired\neight\ncharm\nmetro"
     )
 
     @DynamicTest(order = 1)
-    fun missingFileTest(): CheckResult {
-        val co = CheckOutput()
-        if (!co.start("Input the words file:"))
-            return CheckResult(false,
-                               "Your output should contain \"Input the words file:\"")
-        if (!co.input("noexist.txt",
-                      "Error: The words file noexist.txt doesn't exist."))
-            return CheckResult(false,
-                               "Your output should contain \"Error: The words file noexist.txt doesn't exist.\"")
-        if (!co.programIsFinished())
-            return CheckResult(false,
-                               "The application didn't exit.")
-
-        return CheckResult.correct()
-    }
-
-    @DynamicTest(order = 2,
-                 files = "correctWordFile")
-    fun allCorrectWordsTest(): CheckResult {
-        val co = CheckOutput()
-        if (!co.start("Input the words file:"))
-            return CheckResult(false,
-                               "Your output should contain \"Input the words file:\"")
-        if (!co.input(correctWordFile.keys.first(),
-                      "All words are valid!"))
-            return CheckResult(false,
-                               "Wrong message for file containing only valid words.")
-        if (!co.programIsFinished())
-            return CheckResult(false,
-                               "The application didn't exit.")
-
-        return CheckResult.correct()
-    }
-
-    @DynamicTest(order = 3,
-                 files = "invalidWordsFiles")
-    fun invalidWordsTest(): CheckResult {
-        for (filename in invalidWordsFiles.keys) {
+    fun wrongArgumentsTest(): CheckResult {
+        val argsList = listOf(
+                arrayOf(""),
+                arrayOf("words.txt"),
+                arrayOf("words.txt",
+                        "candidates.txt",
+                        "other.txt")
+        )
+        for (args in argsList) {
             val co = CheckOutput()
-            if (!co.start("Input the words file:"))
+            co.setArguments(*args)
+            if (!co.start("Error: Wrong number of arguments."))
                 return CheckResult(false,
-                                   "Your output should contain \"Input the words file:\"")
-            if (!co.input(filename,
-                          "Warning: ${numOfInvalidWords[filename]} invalid words were found in the $filename file."))
-                return CheckResult(
-                        false,
-                        "Wrong message for file containing invalid words."
-                )
+                                   "Your output should contain \"Error: Wrong number of arguments.\"")
             if (!co.programIsFinished())
                 return CheckResult(false,
                                    "The application didn't exit.")
@@ -75,6 +41,95 @@ class WordsVirtuosoTest : StageTest<Any>() {
         return CheckResult.correct()
     }
 
+    @DynamicTest(order = 2,
+                 files = "wordFiles")
+    fun noExistFilesTest(): CheckResult {
+
+        var co = CheckOutput()
+        co.setArguments("noexist.txt",
+                        "candidates.txt")
+        if (!co.start("Error: The words file noexist.txt doesn't exist."))
+            return CheckResult(false,
+                               "Your output should contain \"The words file noexist.txt doesn't exist.\"")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+        co = CheckOutput()
+        co.setArguments("somewords.txt",
+                        "noexist.txt")
+        if (!co.start("Error: The candidate words file noexist.txt doesn't exist."))
+            return CheckResult(false,
+                               "Your output should contain \"Error: The candidate words file noexist.txt doesn't exist.\"")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 3,
+                 files = "wordFiles")
+    fun invalidWordsTest(): CheckResult {
+        val co = CheckOutput()
+        co.setArguments("wrongwords.txt",
+                        "somecandidates.txt")
+        if (!co.start("Error: 7 invalid words were found in the wrongWords.txt file."))
+            return CheckResult(false,
+                               "Wrong error message after input of a words file with invalid words.")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 4,
+                 files = "wordFiles")
+    fun invalidCandidatesTest(): CheckResult {
+        val co = CheckOutput()
+        co.setArguments("somewords.txt",
+                        "wrongcandidates.txt")
+        if (!co.start("Error: 9 invalid words were found in the wrongcandidates.txt file."))
+            return CheckResult(false,
+                               "Wrong error message after input of a candidate words file with invalid words.")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 5,
+                 files = "wordFiles")
+    fun additionalCandidatesTest(): CheckResult {
+        val co = CheckOutput()
+        co.setArguments("somewords.txt",
+                        "addcandidates.txt")
+        if (!co.start("Error: 3 candidate words are not included in the somewords.txt file."))
+            return CheckResult(false,
+                               "Wrong error message after input of a candidate words file with additional words.")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 6,
+                 files = "wordFiles")
+    fun normalRunTest(): CheckResult {
+        val co = CheckOutput()
+        co.setArguments("somewords.txt",
+                        "somecandidates.txt")
+        if (!co.start("Words Virtuoso"))
+            return CheckResult(false,
+                               "Your output should contain \"Words Virtuoso\"")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
 }
 
 class CheckOutput {
