@@ -7,14 +7,12 @@ fun main() {
     println("Input the words file:")
     val fileName = readln()
 
-    //check if the file exists
     val file = File(fileName)
     if (!file.exists()) {
         println("Error: The words file $fileName doesn't exist.")
         exitProcess(1)
     }
 
-    //read the file
     val lines = file.readLines()
     val invalidWords = lines.count { !checkString(it) }
 
