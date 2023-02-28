@@ -2,7 +2,7 @@ package wordsvirtuoso
 
 fun main() {
     println("Input a 5-letter string:")
-    var input = readln()
+    val input = readln()
 
     if (input.length != 5) {
         println("The input isn't a 5-letter string.")
@@ -13,7 +13,4 @@ fun main() {
     } else {
         println("The input is a valid string.")
     }
-
-
-
 }
