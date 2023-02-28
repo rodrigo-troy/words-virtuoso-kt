@@ -4,93 +4,77 @@ import org.hyperskill.hstest.testcase.CheckResult
 import org.hyperskill.hstest.testing.TestedProgram
 
 class WordsVirtuosoTest : StageTest<Any>() {
+    private val correctWordFile = mapOf(
+            "words.txt" to "stove\nkilos\nWISER\nInTrO\nGyruS\nalong\npedal"
+    )
+    private val invalidWordsFiles = mapOf(
+            "invalidwords1.txt" to "kilos\nwords\nINTRO\nexit\nand\ncontain",
+            "invalidwords2.txt" to "words\nhello\nPIZZA",
+            "invalidwords3.txt" to "words\ntrain\nήλιος\nΔrash\nedt#r\n1nums\nwo rd",
+    )
+    private val numOfInvalidWords = mapOf(
+            "invalidwords1.txt" to 3,
+            "invalidwords2.txt" to 2,
+            "invalidwords3.txt" to 5
+    )
 
     @DynamicTest(order = 1)
-    fun noFiveLetterTest(): CheckResult {
-        val inputStrings = listOf(
-                "Trains",
-                "word",
-                "ART",
-                "result"
-        )
+    fun missingFileTest(): CheckResult {
+        val co = CheckOutput()
+        if (!co.start("Input the words file:"))
+            return CheckResult(false,
+                               "Your output should contain \"Input the words file:\"")
+        if (!co.input("noexist.txt",
+                      "Error: The words file noexist.txt doesn't exist."))
+            return CheckResult(false,
+                               "Your output should contain \"Error: The words file noexist.txt doesn't exist.\"")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
 
-        inputStrings.forEach {input ->
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 2,
+                 files = "correctWordFile")
+    fun allCorrectWordsTest(): CheckResult {
+        val co = CheckOutput()
+        if (!co.start("Input the words file:"))
+            return CheckResult(false,
+                               "Your output should contain \"Input the words file:\"")
+        if (!co.input(correctWordFile.keys.first(),
+                      "All words are valid!"))
+            return CheckResult(false,
+                               "Wrong message for file containing only valid words.")
+        if (!co.programIsFinished())
+            return CheckResult(false,
+                               "The application didn't exit.")
+
+        return CheckResult.correct()
+    }
+
+    @DynamicTest(order = 3,
+                 files = "invalidWordsFiles")
+    fun invalidWordsTest(): CheckResult {
+        for (filename in invalidWordsFiles.keys) {
             val co = CheckOutput()
-            if ( !co.start("Input a 5-letter string:") )
-                return CheckResult(false, "Your output should contain \"Input a 5-letter string:\"")
-            if (!co.input(input, "The input isn't a 5-letter string."))
-                return CheckResult(false, "Your output should contain \"The input isn't a 5-letter string.\"")
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
+            if (!co.start("Input the words file:"))
+                return CheckResult(false,
+                                   "Your output should contain \"Input the words file:\"")
+            if (!co.input(filename,
+                          "Warning: ${numOfInvalidWords[filename]} invalid words were found in the $filename file."))
+                return CheckResult(
+                        false,
+                        "Wrong message for file containing invalid words."
+                )
+            if (!co.programIsFinished())
+                return CheckResult(false,
+                                   "The application didn't exit.")
         }
 
         return CheckResult.correct()
     }
 
-    @DynamicTest(order = 2)
-    fun nonEnglishCharsTest(): CheckResult {
-        val inputStrings = listOf(
-                "ήλιος",
-                "Δrash",
-                "edt#r",
-                "1nums",
-                "wo rd"
-        )
-
-        inputStrings.forEach {input ->
-            val co = CheckOutput()
-            if ( !co.start("Input a 5-letter string:") )
-                return CheckResult(false, "Your output should contain \"Input a 5-letter string:\"")
-            if (!co.input(input, "The input has invalid characters."))
-                return CheckResult(false, "Your output should contain \"The input has invalid characters.\"")
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-        }
-
-        return CheckResult.correct()
-    }
-
-    @DynamicTest(order = 3)
-    fun noDuplicateLettersTest(): CheckResult {
-        val inputStrings = listOf(
-                "Hello",
-                "HELLO",
-                "troop",
-                "fuzzy",
-                "pizza"
-        )
-
-        inputStrings.forEach {input ->
-            val co = CheckOutput()
-            if ( !co.start("Input a 5-letter string:") )
-                return CheckResult(false, "Your output should contain \"Input a 5-letter string:\"")
-            if (!co.input(input, "The input has duplicate letters."))
-                return CheckResult(false, "Your output should contain \"The input has duplicate letters.\"")
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-        }
-
-        return CheckResult.correct()
-    }
-
-    @DynamicTest(order = 4)
-    fun correctWordsTest(): CheckResult {
-        val inputStrings = listOf(
-                "ovals", "SpilT", "FLARE", "crypt"
-        )
-
-        inputStrings.forEach {input ->
-            val co = CheckOutput()
-            if ( !co.start("Input a 5-letter string:") )
-                return CheckResult(false, "Your output should contain \"Input a 5-letter string:\"")
-            if (!co.input(input, "The input is a valid string."))
-                return CheckResult(false, "Your output should contain \"The input is a valid string.\"")
-            if (!co.programIsFinished() )
-                return CheckResult(false, "The application didn't exit.")
-        }
-
-        return CheckResult.correct()
-    }
 }
 
 class CheckOutput {

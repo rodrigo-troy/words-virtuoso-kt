@@ -1,16 +1,35 @@
 package wordsvirtuoso
 
-fun main() {
-    println("Input a 5-letter string:")
-    val input = readln()
+import java.io.File
+import kotlin.system.exitProcess
 
-    if (input.length != 5) {
-        println("The input isn't a 5-letter string.")
-    } else if (input.contains(Regex("[^a-zA-Z]"))) {
-        println("The input has invalid characters.")
-    } else if (input.toSet().size != input.length) {
-        println("The input has duplicate letters.")
-    } else {
-        println("The input is a valid string.")
+fun main() {
+    println("Input the words file:")
+    val fileName = readln()
+
+    //check if the file exists
+    val file = File(fileName)
+    if (!file.exists()) {
+        println("Error: The words file $fileName doesn't exist.")
+        exitProcess(1)
     }
+
+    //read the file
+    val lines = file.readLines()
+    val invalidWords = lines.count { !checkString(it) }
+
+    if (invalidWords > 0) {
+        println("Warning: $invalidWords invalid words were found in the $fileName file.")
+        exitProcess(1)
+    } else {
+        println("All words are valid!")
+    }
+}
+
+fun checkString(input: String): Boolean {
+    return if (input.length != 5) {
+        false
+    } else if (input.contains(Regex("[^a-zA-Z]"))) {
+        false
+    } else input.toSet().size == input.length
 }
