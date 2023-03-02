@@ -44,6 +44,58 @@ fun main(vararg args: String) {
     }
 
     println("Words Virtuoso")
+
+    //Choose a secret word from the candidate words file.
+    val secretWord = candidateWords.random()
+
+
+    while (true) {
+        println("Input a 5-letter word:")
+        val input = readln().trim().lowercase(Locale.getDefault())
+
+        if (input == "exit") {
+            println("The game is over.")
+            exitProcess(0)
+        }
+
+        if (input.length != 5) {
+            println("The input isn't a 5-letter word.")
+            continue
+        }
+
+        if (input.contains(Regex("[^a-zA-Z]"))) {
+            println("One or more letters of the input aren't valid.")
+            continue
+        }
+
+        if (input.toSet().size != input.length) {
+            println("The input has duplicate letters.")
+            continue
+        }
+
+        if (!allWords.contains(input)) {
+            println("The input word isn't included in my words list.")
+            continue
+        }
+
+        //If the input is the same as the secret word, print Correct! and exit.
+        if (input == secretWord) {
+            println("Correct!")
+            exitProcess(0)
+        }
+
+        val clue = CharArray(input.length) { '_' }
+        for (i in input.indices) {
+            if (input[i] == secretWord[i]) {
+                clue[i] = input[i].uppercaseChar()
+            } else if (secretWord.contains(input[i])) {
+                clue[i] = input[i].lowercaseChar()
+            }
+        }
+
+        println(StringBuilder().apply { append(clue) }.toString())
+        println()
+    }
 }
 
 fun checkString(input: String): Boolean {
