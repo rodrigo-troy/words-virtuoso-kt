@@ -48,7 +48,7 @@ fun main(vararg args: String) {
     val secretWord = candidateWords.random()
     var turns = 1
     var start = System.currentTimeMillis()
-    var previousClues = mutableListOf<String>()
+    var previousClues = mutableListOf<Pair<String, String>>()
     var wrongChars = mutableSetOf<Char>()
 
     while (true) {
@@ -56,9 +56,13 @@ fun main(vararg args: String) {
         val input = readln().trim().lowercase(Locale.getDefault())
 
         if (input == secretWord && turns == 1) {
-            println()
-            println(input.uppercase(Locale.getDefault()))
-            println()
+            val lastClue = StringBuilder().apply {
+                append(getClue(input,
+                               secretWord))
+            }.toString()
+            previousClues.add(Pair(input,
+                                   lastClue))
+            printClues(previousClues)
             println("Correct!")
             println("Amazing luck! The solution was found at once.")
             exitProcess(0)
@@ -89,18 +93,21 @@ fun main(vararg args: String) {
             continue
         }
 
+        val lastClue = StringBuilder().apply {
+            append(getClue(input,
+                           secretWord))
+        }.toString()
+
         if (input == secretWord) {
-            previousClues.add(input)
+            previousClues.add(Pair(input,
+                                   lastClue))
             printClues(previousClues)
             println("Correct!")
             break
         }
 
-        val clue = getClue(input,
-                           secretWord)
-
-        val lastClue = StringBuilder().apply { append(clue) }.toString()
-        previousClues.add(lastClue)
+        previousClues.add(Pair(input,
+                               lastClue))
         printClues(previousClues)
 
         printWrongChars(input,
@@ -144,18 +151,22 @@ private fun getClue(input: String,
     return clue
 }
 
-private fun printClues(previousClues: MutableList<String>) {
+private fun printClues(previousClues: List<Pair<String, String>>) {
     println()
-    for (clue in previousClues.reversed()) {
+    for (clue in previousClues) {
+        val word = clue.first
+        val clue = clue.second
+
         for (i in clue.indices) {
             if (clue[i].isUpperCase()) {
-                print("\u001B[48:5:10m${clue[i]}\u001B[0m")
+                print("\u001B[48:5:10m${clue[i].uppercaseChar()}\u001B[0m")
             } else if (clue[i].isLowerCase()) {
-                print("\u001B[48:5:11m${clue[i]}\u001B[0m")
+                print("\u001B[48:5:11m${clue[i].uppercaseChar()}\u001B[0m")
             } else {
-                print("\u001B[48:5:7m${clue[i]}\u001B[0m")
+                print("\u001B[48:5:7m${word[i].uppercaseChar()}\u001B[0m")
             }
         }
+        println()
     }
     println()
 }
