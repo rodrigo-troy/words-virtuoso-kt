@@ -45,13 +45,24 @@ fun main(vararg args: String) {
 
     println("Words Virtuoso")
 
-    //Choose a secret word from the candidate words file.
     val secretWord = candidateWords.random()
-
+    var turns = 1
+    var start = System.currentTimeMillis()
+    var previousClues = mutableListOf<String>()
+    var wrongChars = mutableSetOf<Char>()
 
     while (true) {
         println("Input a 5-letter word:")
         val input = readln().trim().lowercase(Locale.getDefault())
+
+        if (input == secretWord && turns == 1) {
+            println()
+            println(input.uppercase(Locale.getDefault()))
+            println()
+            println("Correct!")
+            println("Amazing luck! The solution was found at once.")
+            exitProcess(0)
+        }
 
         if (input == "exit") {
             println("The game is over.")
@@ -78,24 +89,57 @@ fun main(vararg args: String) {
             continue
         }
 
-        //If the input is the same as the secret word, print Correct! and exit.
         if (input == secretWord) {
+            previousClues.add(input)
+            printClues(previousClues)
             println("Correct!")
-            exitProcess(0)
+            break
         }
 
-        val clue = CharArray(input.length) { '_' }
+        val clue = getClue(input,
+                           secretWord)
+
+        val lastClue = StringBuilder().apply { append(clue) }.toString()
+        previousClues.add(lastClue)
+        printClues(previousClues)
+
         for (i in input.indices) {
-            if (input[i] == secretWord[i]) {
-                clue[i] = input[i].uppercaseChar()
-            } else if (secretWord.contains(input[i])) {
-                clue[i] = input[i].lowercaseChar()
+            if (!secretWord.contains(input[i]) && !wrongChars.contains(input[i])) {
+                wrongChars.add(input[i])
             }
         }
 
-        println(StringBuilder().apply { append(clue) }.toString())
+        println(wrongChars.sorted().joinToString("") { it.uppercaseChar().toString() })
         println()
+
+        turns++
     }
+
+    val end = System.currentTimeMillis()
+    val duration = end - start
+
+    println("The solution was found after $turns tries in ${duration / 1000} seconds.")
+}
+
+private fun getClue(input: String,
+                    secretWord: String): CharArray {
+    val clue = CharArray(input.length) { '_' }
+
+    for (i in input.indices) {
+        if (input[i] == secretWord[i]) {
+            clue[i] = input[i].uppercaseChar()
+        } else if (secretWord.contains(input[i])) {
+            clue[i] = input[i].lowercaseChar()
+        }
+    }
+
+    return clue
+}
+
+private fun printClues(previousClues: MutableList<String>) {
+    println()
+    previousClues.forEach { println(it) }
+    println()
 }
 
 fun checkString(input: String): Boolean {
