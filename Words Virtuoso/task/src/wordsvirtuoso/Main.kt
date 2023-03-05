@@ -103,13 +103,9 @@ fun main(vararg args: String) {
         previousClues.add(lastClue)
         printClues(previousClues)
 
-        for (i in input.indices) {
-            if (!secretWord.contains(input[i]) && !wrongChars.contains(input[i])) {
-                wrongChars.add(input[i])
-            }
-        }
-
-        println(wrongChars.sorted().joinToString("") { it.uppercaseChar().toString() })
+        printWrongChars(input,
+                        secretWord,
+                        wrongChars)
         println()
 
         turns++
@@ -119,6 +115,18 @@ fun main(vararg args: String) {
     val duration = end - start
 
     println("The solution was found after $turns tries in ${duration / 1000} seconds.")
+}
+
+private fun printWrongChars(input: String,
+                            secretWord: String,
+                            wrongChars: MutableSet<Char>) {
+    for (i in input.indices) {
+        if (!secretWord.contains(input[i]) && !wrongChars.contains(input[i])) {
+            wrongChars.add(input[i])
+        }
+    }
+
+    println("\u001B[48:5:14m${wrongChars.sorted().joinToString("") { it.uppercaseChar().toString() }}\u001B[0m")
 }
 
 private fun getClue(input: String,
@@ -138,7 +146,17 @@ private fun getClue(input: String,
 
 private fun printClues(previousClues: MutableList<String>) {
     println()
-    previousClues.forEach { println(it) }
+    for (clue in previousClues.reversed()) {
+        for (i in clue.indices) {
+            if (clue[i].isUpperCase()) {
+                print("\u001B[48:5:10m${clue[i]}\u001B[0m")
+            } else if (clue[i].isLowerCase()) {
+                print("\u001B[48:5:11m${clue[i]}\u001B[0m")
+            } else {
+                print("\u001B[48:5:7m${clue[i]}\u001B[0m")
+            }
+        }
+    }
     println()
 }
 
